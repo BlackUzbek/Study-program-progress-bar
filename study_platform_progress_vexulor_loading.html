@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>Study Platform v15 — Progress</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09131b;
+      --panel: #10212a;
+      --panel2: #17303a;
+      --line: #29434a;
+      --text: #edf7f4;
+      --muted: #9ab2b2;
+      --accent: #78e0bd;
+      --accent2: #56c7c0;
+      --pending: #66758c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 28px 16px;
+      background: radial-gradient(ellipse at 10% 0%, #173a3d 0%, transparent 42%),
+                  radial-gradient(ellipse at 100% 100%, #102a32 0%, transparent 44%), var(--bg);
+      color: var(--text); font: 16px/1.5 system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; }
+
+
+    .boot-loader {
+      position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:13px;padding:24px;background:radial-gradient(ellipse at center,#173a3d 0%,#0d2028 40%,#09131b 78%);
+      transition:opacity .55s ease,visibility .55s ease;
+    }
+    .boot-loader.is-hidden { opacity:0;visibility:hidden;pointer-events:none; }
+    .boot-orbit { width:88px;height:88px;border:1px solid #315a56;border-radius:50%;display:grid;place-items:center;position:relative;
+      animation:orbit-breathe 1.8s ease-in-out infinite;box-shadow:0 0 36px #78e0bd12,inset 0 0 28px #78e0bd0c; }
+    .boot-orbit:before,.boot-orbit:after { content:"";position:absolute;border:1px solid #78e0bd42;border-radius:50%;inset:8px; }
+    .boot-orbit:after { inset:-7px;border-color:#56c7c033;animation:orbit-spin 4s linear infinite; }
+    .boot-core { width:48px;height:48px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(145deg,#8ce8c9,#4bbab2);
+      color:#0b2426;font-size:1.45rem;font-weight:950;box-shadow:0 0 28px #78e0bd35; }
+    .orbit-dot { position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:#b5ffe7;box-shadow:0 0 14px #78e0bd;transform-origin:0 48px;animation:orbit-spin 1.6s linear infinite; }
+    .boot-brand { margin-top:13px;font-size:.95rem;font-weight:850;letter-spacing:.19em;color:#edf7f4;text-align:center; }
+    .boot-brand span { color:#78e0bd;font-size:.75rem;letter-spacing:.08em; }
+    .boot-caption { color:#9ab2b2;font-size:.85rem;animation:caption-pulse 1.4s ease-in-out infinite; }
+    .boot-track { width:min(230px,70vw);height:3px;background:#1d343a;border-radius:999px;overflow:hidden;margin-top:9px; }
+    .boot-track-fill { height:100%;width:35%;border-radius:999px;background:linear-gradient(90deg,#78e0bd,#56c7c0);animation:loading-sweep 1.25s ease-in-out infinite; }
+    .boot-foot { margin-top:13px;color:#648783;font-size:.61rem;font-weight:800;letter-spacing:.2em;text-align:center; }
+    .boot-foot span { letter-spacing:0; }
+    @keyframes orbit-spin { to { transform:rotate(360deg); } }
+    @keyframes orbit-breathe { 50% { transform:scale(1.045);box-shadow:0 0 45px #78e0bd22,inset 0 0 30px #78e0bd12; } }
+    @keyframes caption-pulse { 50% { opacity:.55; } }
+    @keyframes loading-sweep { 0% { transform:translateX(-120%); } 100% { transform:translateX(360%); } }
+    @media (prefers-reduced-motion:reduce) { .boot-orbit,.orbit-dot,.boot-caption,.boot-track-fill { animation:none; } .boot-track-fill { width:100%; } }
+
+    .creator-card {
+      display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;
+      padding:20px 22px;margin:0 0 16px;border:1px solid #2b514f;border-radius:20px;
+      background:linear-gradient(110deg,#142f32 0%,#10252b 58%,#102027 100%);
+      box-shadow:0 18px 50px #00000018;
+    }
+    .creator-card:after { content:"";position:absolute;width:210px;height:210px;border:1px solid #78e0bd17;border-radius:50%;right:44px;top:-132px;pointer-events:none; }
+    .creator-mark { flex:0 0 54px;width:54px;height:54px;display:grid;place-items:center;border-radius:17px;
+      background:linear-gradient(145deg,#8ce8c9,#4bbab2);color:#0b2426;font-weight:950;font-size:1.6rem;
+      box-shadow:0 8px 25px #56c7c022; }
+    .creator-copy { position:relative;z-index:1;min-width:0; }
+    .creator-label { color:#83bcb2;font-size:.65rem;font-weight:850;letter-spacing:.19em;margin-bottom:2px; }
+    .creator-link { color:#e7fff6;text-decoration:none;font-size:1.04rem;font-weight:800;letter-spacing:-.02em; }
+    .creator-link span { color:var(--accent);font-size:.85em; }
+    .creator-link:hover { text-decoration:underline;text-underline-offset:4px; }
+    .creator-quote { margin:6px 0 0;color:#d7e9e3;font-weight:650;font-size:.97rem;letter-spacing:.01em; }
+    .quote-mark { color:var(--accent);font-size:1.4em;vertical-align:-.12em;margin-right:3px; }
+    .eyes { margin-left:3px; }
+    .creator-translation { margin:3px 0 0;color:#8da9a7;font-size:.78rem; }
+    .creator-seal { margin-left:auto;flex:0 0 auto;text-align:center;color:#719b96;font-size:.56rem;font-weight:850;letter-spacing:.17em;line-height:1.5;transform:rotate(7deg); }
+    .creator-seal b { display:inline-grid;place-items:center;width:26px;height:26px;margin:4px 0;border:1px solid #47736b;border-radius:50%;color:var(--accent);font-size:.9rem; }
+    .hero,.stages,.next { border-color:#29434a; }
+    .progress-track { background:#1d343a; }
+    .progress-fill { box-shadow:0 0 22px #78e0bd33; }
+    .stage { border-color:#263e45; }
+    .stage.done { background:linear-gradient(90deg,#12302d,#0d1b22 68%);border-color:#28564c; }
+    .pill { border-color:#345a55;background:#18342f;color:#c7f6e8; }
+
+    .topline { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .logo {
+      width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));color:#07191c;font-weight:900;
+      box-shadow:0 8px 28px #4db8ff25;
+    }
+    .eyebrow { color:var(--muted); text-transform:uppercase; letter-spacing:.14em; font-size:.72rem; font-weight:700; }
+    h1 { margin:2px 0 0; font-size:clamp(1.4rem,4vw,2rem); letter-spacing:-.035em; }
+    .live { border:1px solid #285c50;background:#12362f;color:#9af4d5;border-radius:999px;padding:6px 10px;font-size:.78rem;white-space:nowrap; }
+    .hero, .stages, .next {
+      background:linear-gradient(145deg,#11242b,#0d1b22);
+      border:1px solid var(--line); border-radius:22px; padding:clamp(18px,4vw,30px);
+      box-shadow:0 20px 60px #00000020;
+    }
+    .hero { margin-bottom:16px; }
+    .hero-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
+    .hero h2 { margin:0 0 6px; font-size:1.15rem; }
+    .sub { margin:0; color:var(--muted); font-size:.94rem; }
+    .percent { font-size:clamp(2.3rem,7vw,3.6rem); line-height:1; font-weight:850; letter-spacing:-.06em; color:var(--accent); }
+    .progress-track { height:13px; margin:24px 0 12px; background:#202c3d; border-radius:999px; overflow:hidden; }
+    .progress-fill { height:100%; width:50%; border-radius:inherit; background:linear-gradient(90deg,var(--accent),var(--accent2)); box-shadow:0 0 22px #65e6b44a; transition:width .35s ease; }
+    .progress-meta { display:flex; justify-content:space-between; gap:12px; color:var(--muted); font-size:.85rem; }
+    .section-title { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:0 0 18px; }
+    .section-title h2 { margin:0; font-size:1.1rem; }
+    .count { color:var(--muted); font-size:.82rem; }
+    .stage-list { display:grid; gap:10px; }
+    .stage {
+      display:flex; align-items:center; gap:13px; padding:13px 14px;
+      border:1px solid var(--line); background:#0c1b21; border-radius:14px;
+    }
+    .stage.done { border-color:#285e52; background:linear-gradient(90deg,#112a27,#0d1522 65%); }
+    .status {
+      flex:0 0 28px; width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+      border:1px solid #3a4a60;color:var(--pending);font-size:.85rem;font-weight:800;
+    }
+    .done .status { border-color:#39896e;background:#174538;color:#9af4d5; }
+    .stage-name { flex:1; font-weight:600; font-size:.94rem; }
+    .stage-state { color:var(--muted); font-size:.78rem; white-space:nowrap; }
+    .done .stage-state { color:#9af4d5; }
+    .bottom { display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px; }
+    .next h2 { margin:0 0 8px;font-size:1rem; }
+    .next p { margin:0;color:var(--muted);font-size:.9rem; }
+    .pill { display:inline-flex;align-items:center;gap:7px;border:1px solid #3a506b;background:#17263a;border-radius:999px;padding:5px 9px;font-size:.78rem;color:#c9dcf5;margin-bottom:12px; }
+    .dot { width:7px;height:7px;border-radius:50%;background:#ffc66d; }
+    .foot { text-align:center;color:#71819a;font-size:.78rem;margin:22px 0 0; }
+
+    .minigame { margin-top:16px; }
+
+    .code-arena { position:relative;overflow:hidden;border:1px solid #2c4055;border-radius:14px;background:#0b191f;min-height:310px; }
+    .code-toolbar { height:39px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;background:#14272d;border-bottom:1px solid #26384d;color:#9ab2b2;font: .72rem ui-monospace,monospace; }
+    .traffic { display:flex;gap:5px; } .traffic i { width:8px;height:8px;border-radius:50%;background:#f7768e; } .traffic i:nth-child(2){background:#e0af68}.traffic i:nth-child(3){background:#9ece6a}
+    .code-tag { color:#8ed6ff;border:1px solid #31516a;padding:2px 5px;border-radius:5px; }
+    .code-sample { margin:0;padding:17px 14px;color:#d3deef;font:clamp(.72rem,2.4vw,.86rem)/1.9 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre; }
+    .code-muted { color:#50647d;user-select:none; } .code-purple { color:#bb9af7; } .code-blue { color:#7dcfff; } .code-green { color:#9ece6a; }
+    .arena-message { position:absolute;inset:39px 0 0;display:flex;align-items:center;justify-content:center;gap:8px;flex-direction:column;text-align:center;padding:18px;background:#091321eF; }
+    .arena-message strong { font-size:1.05rem; } .arena-message span { color:var(--muted);font-size:.85rem;max-width:310px; }
+    .arena-emoji { font-size:2.1rem;filter:drop-shadow(0 0 14px #ff536477); }
+    .bug-target { position:absolute;width:44px;height:44px;border:1px solid #ff9ba7;border-radius:12px;background:#491d2a;color:white;font-size:1.35rem;display:grid;place-items:center;cursor:pointer;box-shadow:0 0 14px #ff536455;animation:bug-pop .16s ease-out;touch-action:manipulation; }
+    @keyframes bug-pop { from { transform:scale(.5) rotate(-20deg);opacity:.4; } to { transform:scale(1) rotate(0);opacity:1; } }
+    .game-bottom { display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:13px; }
+    #game-feedback { color:var(--muted);font-size:.86rem; }
+    .game-btn { border:0;border-radius:11px;padding:10px 14px;background:linear-gradient(100deg,var(--accent),var(--accent2));color:#06111c;font:inherit;font-weight:800;cursor:pointer; }
+    .game-btn.secondary { background:#223149;color:var(--text);border:1px solid #3a4b63; }
+    @media(max-width:430px){.code-arena{min-height:290px}.code-sample{font-size:.69rem;padding:13px 9px}}
+
+
+    .arcade-card { overflow:hidden; }
+    .arcade-stats { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px; }
+    .stat { border:1px solid #2b3b53;background:#0c1b21;border-radius:12px;padding:10px 12px;min-width:0; }
+    .stat-label { display:block;color:var(--muted);font-size:.68rem;letter-spacing:.12em;font-weight:800;margin-bottom:3px; }
+    .stat strong { display:block;font-size:1.3rem;line-height:1.2;letter-spacing:-.03em; }
+    #game-score { color:var(--accent); } #game-time { color:#ffd779; } #game-combo { color:#a9a4ff; } #game-best { color:#78c8ff; }
+    .arena { position:relative;height:300px;border:1px solid #293e58;border-radius:15px;overflow:hidden;isolation:isolate;
+      background:radial-gradient(ellipse at center,#162a42 0%,#0b1423 72%);
+      background-image:linear-gradient(#22344a33 1px,transparent 1px),linear-gradient(90deg,#22344a33 1px,transparent 1px),radial-gradient(ellipse at center,#162a42 0%,#0b1423 72%);
+      background-size:24px 24px,24px 24px,auto; }
+    .arena:before { content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,transparent 0, #07101c99 100%);pointer-events:none;z-index:-1; }
+    .arena-message { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;flex-direction:column;text-align:center;padding:20px; }
+    .arena-message strong { font-size:1.05rem; }
+    .arena-message span { color:var(--muted);font-size:.85rem;max-width:300px; }
+    .arena-emoji { font-size:2.3rem;filter:drop-shadow(0 0 15px #65e6b477); }
+    .target { position:absolute;width:48px;height:48px;border-radius:50%;border:2px solid #b5ffe7;color:#06111c;font-size:1.4rem;font-weight:900;
+      background:radial-gradient(circle at 35% 30%,#f3fff9,#65e6b4 45%,#2099b8);
+      box-shadow:0 0 12px #65e6b4aa,0 0 28px #4db8ff66;cursor:pointer;display:grid;place-items:center;
+      animation:target-pop .16s ease-out;touch-action:manipulation; }
+    .target:active { transform:scale(.88); }
+    @keyframes target-pop { from { transform:scale(.45);opacity:.35; } to { transform:scale(1);opacity:1; } }
+    .game-bottom { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;flex-wrap:wrap; }
+    #game-feedback { color:var(--muted);font-size:.86rem; }
+    .game-btn { border:0;border-radius:11px;padding:10px 14px;background:linear-gradient(100deg,var(--accent),var(--accent2));color:#06111c;font:inherit;font-weight:800;cursor:pointer; }
+    .game-btn.secondary { background:#223149;color:var(--text);border:1px solid #3a4b63; }
+    .game-btn:disabled { opacity:.45;cursor:not-allowed; }
+    @media (max-width:430px) { .arcade-stats { gap:6px; } .stat { padding:8px; } .stat strong { font-size:1.1rem; } .arena { height:270px; } }
+
+    .game-intro { margin:-6px 0 18px; }
+    .game-card { border:1px solid #2a4055; background:linear-gradient(145deg,#0c1928,#101b2a); border-radius:17px; padding:18px; }
+    .game-top { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+    .xp { color:#ffd779; font-weight:800; font-size:.9rem; }
+    .game-card h3 { margin:0 0 16px; font-size:1.05rem; line-height:1.45; }
+    .answers { display:grid; gap:9px; }
+    .answer { width:100%; text-align:left; color:var(--text); font:inherit; font-size:.9rem; padding:12px 14px; border:1px solid #304158; border-radius:12px; background:#121f30; cursor:pointer; transition:transform .15s,border-color .15s,background .15s; }
+    .answer:hover:not(:disabled) { transform:translateY(-1px); border-color:var(--accent2); }
+    .answer:disabled { cursor:default; opacity:.92; }
+    .answer.correct { border-color:#39896e; background:#14392f; }
+    .answer.wrong { border-color:#9b5360; background:#3a1d29; }
+    .game-feedback { min-height:26px; margin-top:13px; color:var(--muted); font-size:.88rem; }
+    .game-feedback.good { color:#9af4d5; }
+    .game-feedback.bad { color:#ffb1bb; }
+    .game-actions { display:flex; gap:9px; flex-wrap:wrap; margin-top:10px; }
+    .game-btn { border:0; border-radius:11px; padding:10px 14px; background:linear-gradient(100deg,var(--accent),var(--accent2)); color:#06111c; font:inherit; font-weight:800; cursor:pointer; }
+    .game-btn:disabled { opacity:.4; cursor:not-allowed; }
+    .game-btn.secondary { background:#223149; color:var(--text); border:1px solid #3a4b63; }
+
+    @media (max-width:650px) {
+      body { padding:18px 12px; }
+      .topline { align-items:flex-start; }
+      .live { margin-top:5px; }
+      .creator-card { padding:16px;gap:12px; }
+      .creator-mark { width:44px;height:44px;flex-basis:44px;border-radius:14px;font-size:1.35rem; }
+      .creator-seal { display:none; }
+      .creator-quote { font-size:.9rem; }
+      .creator-translation { font-size:.73rem; }
+      .hero-head { gap:10px; }
+      .bottom { grid-template-columns:1fr; }
+      .stage { padding:12px 10px;gap:10px; }
+      .stage-name { font-size:.88rem; }
+      .stage-state { font-size:.72rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="boot-loader" id="boot-loader" role="status" aria-live="polite">
+    <div class="boot-orbit">
+      <div class="boot-core">V</div>
+      <span class="orbit-dot"></span>
+    </div>
+    <div class="boot-brand">STUDY PLATFORM <span>v15</span></div>
+    <div class="boot-caption">Tizim ishga tayyorlanmoqda</div>
+    <div class="boot-track"><div class="boot-track-fill"></div></div>
+    <div class="boot-foot">AUDENTES FORTUNA IUVAT <span>👀</span></div>
+  </div>
+
+  <main class="wrap">
+    <header class="topline">
+      <div class="brand">
+        <div class="logo">SP</div>
+        <div>
+          <div class="eyebrow">A Vexulor project · dashboard</div>
+          <h1>Study Platform v15</h1>
+        </div>
+      </div>
+      <div class="live">● Loyiha holati</div>
+    </header>
+
+
+    <section class="creator-card" aria-label="Muallif havolasi va shiori">
+      <div class="creator-mark">V</div>
+      <div class="creator-copy">
+        <div class="creator-label">BUILDER’S NOTE</div>
+        <a class="creator-link" href="https://t.me/Vexulor" target="_blank" rel="noopener noreferrer">
+          @Vexulor <span aria-hidden="true">↗</span>
+        </a>
+        <p class="creator-quote"><span class="quote-mark">“</span> Audentes Fortuna Iuvat <span class="eyes">👀</span></p>
+        <p class="creator-translation">Jasurlarga omad yor bo‘ladi.</p>
+      </div>
+      <div class="creator-seal" aria-hidden="true">FORTUNA<br><b>✳</b><br>IUVAT</div>
+    </section>
+
+    <section class="hero" aria-labelledby="progress-heading">
+      <div class="hero-head">
+        <div>
+          <h2 id="progress-heading">Finalgacha bo‘lgan yo‘l</h2>
+          <p class="sub">Server, backend va admin kirishi tayyor. Keyingi bosqich — HTTPS va APK.</p>
+        </div>
+        <div class="percent" id="percent">50%</div>
+      </div>
+      <div class="progress-track" role="progressbar" aria-label="Loyiha progressi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" id="progressbar">
+        <div class="progress-fill" id="fill"></div>
+      </div>
+      <div class="progress-meta">
+        <span id="completed-label">4 / 8 asosiy bosqich bajarildi</span>
+        <span>Umumiy loyiha progressi</span>
+      </div>
+    </section>
+
+    <section class="stages" aria-labelledby="stages-heading">
+      <div class="section-title">
+        <h2 id="stages-heading">Bosqichlar</h2>
+        <span class="count">Final checklist</span>
+      </div>
+      <div class="stage-list" id="stage-list">
+        <div class="stage done" data-done="true"><span class="status">✓</span><span class="stage-name">EC2 server va Docker tayyorlash</span><span class="stage-state">Bajarildi</span></div>
+        <div class="stage done" data-done="true"><span class="status">✓</span><span class="stage-name">PostgreSQL va migratsiya</span><span class="stage-state">Bajarildi</span></div>
+        <div class="stage done" data-done="true"><span class="status">✓</span><span class="stage-name">Backend API ishga tushirish</span><span class="stage-state">Bajarildi</span></div>
+        <div class="stage done" data-done="true"><span class="status">✓</span><span class="stage-name">Admin yaratish va loginni tekshirish</span><span class="stage-state">Bajarildi</span></div>
+        <div class="stage" data-done="false"><span class="status">5</span><span class="stage-name">Domen va HTTPS sozlash</span><span class="stage-state">Kutilmoqda</span></div>
+        <div class="stage" data-done="false"><span class="status">6</span><span class="stage-name">Android APK yig‘ish</span><span class="stage-state">Kutilmoqda</span></div>
+        <div class="stage" data-done="false"><span class="status">7</span><span class="stage-name">Telefonda va API’da sinovlar</span><span class="stage-state">Kutilmoqda</span></div>
+        <div class="stage" data-done="false"><span class="status">8</span><span class="stage-name">Final tekshiruv va topshirish</span><span class="stage-state">Kutilmoqda</span></div>
+      </div>
+    </section>
+
+
+
+
+    <section class="stages minigame" aria-labelledby="game-heading">
+      <div class="section-title">
+        <h2 id="game-heading">👾 DEV TIMEKILLER — Bug Hunter</h2>
+        <span class="count">45 soniya</span>
+      </div>
+      <p class="sub game-intro">Study Platform ishlab chiqilishiga mos mini-o‘yin: kod ichidagi buglarni topib bosing, build buzilishidan oldin ularni yo‘qoting!</p>
+      <div class="game-card arcade-card">
+        <div class="arcade-stats">
+          <div class="stat"><span class="stat-label">FIX QILINGAN</span><strong id="game-score">0</strong></div>
+          <div class="stat"><span class="stat-label">VAQT</span><strong id="game-time">45</strong></div>
+          <div class="stat"><span class="stat-label">STREAK</span><strong id="game-combo">x0</strong></div>
+          <div class="stat"><span class="stat-label">REKORD</span><strong id="game-best">0</strong></div>
+        </div>
+        <div class="code-arena" id="arena">
+          <div class="code-toolbar"><span class="traffic"><i></i><i></i><i></i></span><span>study_platform / backend.py</span><span class="code-tag">PY</span></div>
+          <pre class="code-sample" aria-hidden="true"><span class="code-muted">01</span> <span class="code-purple">def</span> <span class="code-blue">launch_platform</span>():
+<span class="code-muted">02</span>     api = <span class="code-green">"Study Platform"</span>
+<span class="code-muted">03</span>     database = connect_db()
+<span class="code-muted">04</span>     <span class="code-purple">if</span> database.is_ready:
+<span class="code-muted">05</span>         run_migrations()
+<span class="code-muted">06</span>         start_api()
+<span class="code-muted">07</span>     <span class="code-purple">return</span> <span class="code-green">"Let's ship!"</span></pre>
+          <div class="arena-message" id="arena-message">
+            <div class="arena-emoji">🪲</div>
+            <strong>Buglarni ovlashni boshlang!</strong>
+            <span>Qizil buglarni bosing. Har bir bug +10 ball, ketma-ketlik esa streak beradi.</span>
+            <button class="game-btn" id="game-start">IDE’ni ishga tushirish ▶</button>
+          </div>
+          <button class="bug-target" id="target" aria-label="Bugni tuzatish" hidden>🐛</button>
+        </div>
+        <div class="game-bottom">
+          <span id="game-feedback" aria-live="polite">Production oldidan buglarni tozalaymiz 😄</span>
+          <button class="game-btn secondary" id="game-restart">Qayta boshlash ↻</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="bottom">
+      <section class="next">
+        <span class="pill"><span class="dot"></span> Keyingi qadam</span>
+        <h2>Domen uchun 80 va 443-portlar</h2>
+        <p>AWS Security Group’da HTTP (80) va HTTPS (443) ruxsatlari qo‘shilgach, Caddy reverse proxy orqali bepul TLS sertifikatini sozlaymiz.</p>
+      </section>
+      <section class="next">
+        <h2>Final mezoni</h2>
+        <p>HTTPS API ishlashi, APK serverga ulanishi, admin/o‘qituvchi/o‘quvchi oqimlari sinovdan o‘tishi va yakuniy tekshiruv bajarilishi kerak.</p>
+      </section>
+    </div>
+    <footer class="foot">Study Platform v15 · Holat qo‘lda yangilanadi · Bu sahifa bitta mustaqil HTML fayl</footer>
+  </main>
+  <script>
+
+    (() => {
+      const loader = document.getElementById('boot-loader');
+      if (!loader) return;
+      const hideLoader = () => {
+        loader.classList.add('is-hidden');
+        window.setTimeout(() => loader.remove(), 650);
+      };
+      if (document.readyState === 'complete') {
+        window.setTimeout(hideLoader, 900);
+      } else {
+        window.addEventListener('load', () => window.setTimeout(hideLoader, 900), { once: true });
+      }
+      // Avoid leaving the overlay on screen if a browser delays the load event.
+      window.setTimeout(hideLoader, 3500);
+    })();
+
+    // Bosqichni yangilash uchun data-done qiymatini true/false qilib o'zgartiring.
+    (() => {
+      const stages = [...document.querySelectorAll('.stage')];
+      const completed = stages.filter(s => s.dataset.done === 'true').length;
+      const percent = Math.round(completed / stages.length * 100);
+      document.getElementById('percent').textContent = percent + '%';
+      document.getElementById('fill').style.width = percent + '%';
+      document.getElementById('progressbar').setAttribute('aria-valuenow', percent);
+      document.getElementById('completed-label').textContent = `${completed} / ${stages.length} asosiy bosqich bajarildi`;
+    })();
+
+
+
+    // Bug Hunter: dastur ishlab chiqish mavzusidagi mustaqil timekiller.
+    (() => {
+      const arena = document.getElementById('arena');
+      const target = document.getElementById('target');
+      const message = document.getElementById('arena-message');
+      const startBtn = document.getElementById('game-start');
+      const restartBtn = document.getElementById('game-restart');
+      const scoreEl = document.getElementById('game-score');
+      const timeEl = document.getElementById('game-time');
+      const comboEl = document.getElementById('game-combo');
+      const bestEl = document.getElementById('game-best');
+      const feedback = document.getElementById('game-feedback');
+      let score = 0, combo = 0, seconds = 45, running = false, timer = null, spawnTimer = null, best = 0;
+      try { best = Number(localStorage.getItem('studyPlatformBugHunterBest') || 0); } catch (_) {}
+      bestEl.textContent = best;
+      function placeBug() {
+        const size = 44, pad = 7;
+        const left = pad + Math.random() * Math.max(1, arena.clientWidth - size - pad * 2);
+        const top = 48 + Math.random() * Math.max(1, arena.clientHeight - size - 55);
+        target.style.left = `${left}px`; target.style.top = `${top}px`;
+        target.textContent = ['🐛','🪲','💥'][Math.floor(Math.random()*3)];
+        target.hidden = false;
+      }
+      function startGame() {
+        clearInterval(timer); clearInterval(spawnTimer);
+        score = 0; combo = 0; seconds = 45; running = true;
+        scoreEl.textContent = score; comboEl.textContent = 'x0'; timeEl.textContent = seconds;
+        message.hidden = true; placeBug();
+        feedback.textContent = 'Buglarni top va bos! 🧑‍💻';
+        timer = setInterval(() => {
+          seconds--; timeEl.textContent = seconds;
+          if (seconds <= 0) finishGame();
+        }, 1000);
+        spawnTimer = setInterval(() => { if (running) placeBug(); }, 950);
+      }
+      function finishGame() {
+        clearInterval(timer); clearInterval(spawnTimer); running = false; target.hidden = true; message.hidden = false;
+        const title = document.createElement('strong');
+        title.textContent = score >= 400 ? '🏆 Senior Bug Hunter!' : score >= 220 ? '🔥 Debugging pro!' : '🛠️ Junior developer!';
+        const result = document.createElement('span'); result.textContent = `45 soniyada ${score} ball. ${Math.floor(score/10)} ta bug tuzatildi!`;
+        const again = document.createElement('button'); again.className = 'game-btn'; again.textContent = 'Yana kod yozish ↻';
+        again.addEventListener('click', startGame);
+        const emoji = document.createElement('div'); emoji.className = 'arena-emoji'; emoji.textContent = '💻';
+        message.replaceChildren(emoji, title, result, again);
+        feedback.textContent = score > best ? 'Yangi rekord! Natija shu brauzerda saqlanadi.' : 'Commit qilishdan oldin yana bir raund?';
+        if (score > best) {
+          best = score; bestEl.textContent = best;
+          try { localStorage.setItem('studyPlatformBugHunterBest', String(best)); } catch (_) {}
+        }
+      }
+      target.addEventListener('click', () => {
+        if (!running) return;
+        combo++; const bonus = combo % 5 === 0 ? 20 : 0; score += 10 + bonus;
+        scoreEl.textContent = score; comboEl.textContent = `x${combo}`;
+        feedback.textContent = bonus ? '🔥 5x STREAK — +20 BONUS!' : ['Bug fixed ✓','Patch applied ⚡','Commit it! 🚀'][Math.floor(Math.random()*3)];
+        placeBug();
+      });
+      startBtn.addEventListener('click', startGame);
+      restartBtn.addEventListener('click', startGame);
+      window.addEventListener('resize', () => { if (running) placeBug(); });
+    })();
+
+  </script>
+</body>
+</html>
